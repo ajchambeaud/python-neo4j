@@ -2,10 +2,26 @@ version: '3'
 services: 
     app:
         build: .
-        ports: 
+        ports:
             - '5000:5000'
-        environment: 
+        environment:
             - FLASK_APP=main.py
             - FLASK_ENV=development
-        volumes: 
+            - DATABASE_USERNAME=neo4j
+            - DATABASE_PASSWORD=admin123
+            - DATABASE_URL=neo4j://neo4j:7687
+        volumes:
             - ./src:/usr/src/app
+        depends_on:
+            - neo4j
+
+    neo4j:
+        image: neo4j:latest
+        ports:
+            - 7474:7474
+            - 7687:7687
+        volumes:
+            - $HOME/neo4j/data:/data
+            - $HOME/neo4j/logs:/logs
+        environment:
+            - NEO4J_AUTH=neo4j/admin123
