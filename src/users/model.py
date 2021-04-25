@@ -29,6 +29,7 @@ def get_all():
     session.close()
     return data
 
+
 def get(id):
     session = NeoDB().getSession()
 
