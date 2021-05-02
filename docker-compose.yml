@@ -1,7 +1,7 @@
 version: '3'
 services: 
     app:
-        build: .
+        build: ./app
         ports:
             - '5000:5000'
         environment:
@@ -11,12 +11,12 @@ services:
             - DATABASE_PASSWORD=admin123
             - DATABASE_URL=neo4j://neo4j:7687
         volumes:
-            - ./src:/usr/src/app
+            - ./app/src:/usr/src/app
         depends_on:
             - neo4j
 
     neo4j:
-        image: neo4j:latest
+        build: ./neo4j
         ports:
             - 7474:7474
             - 7687:7687
@@ -25,3 +25,5 @@ services:
             - $HOME/neo4j/logs:/logs
         environment:
             - NEO4J_AUTH=neo4j/admin123
+            - NEO4J_USERNAME=neo4j
+            - NEO4J_PASSWORD=admin123
