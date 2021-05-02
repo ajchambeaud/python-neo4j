@@ -50,6 +50,7 @@ def get_all(author, category):
     session.close()
     return data
 
+
 def get(id):
     session = NeoDB().getSession()
 
@@ -116,6 +117,7 @@ def delete(id):
 
     session.close()
     return data
+
 
 def update(updated):
     session = NeoDB().getSession()

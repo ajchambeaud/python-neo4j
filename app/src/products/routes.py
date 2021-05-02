@@ -1,5 +1,6 @@
 from flask import (Blueprint, request, jsonify)
 from flask import current_app
+from errors import ProductNotFound, MissingParameter
 from . import model
 
 bp = Blueprint('product', __name__, url_prefix='/products')
@@ -9,64 +10,47 @@ def get_products():
     author = request.args.get('author')
     category = request.args.get('category')
 
-    try:
-        return jsonify(model.get_all(author, category)), 200
-    except Exception as e:
-        current_app.logger.error(e)
-        return { 'message': 'Internal server error' }, 500
+    return jsonify(model.get_all(author, category)), 200
 
 
 @bp.route('/<id>')
 def get_product(id):
-    try:
-        product = model.get(id)
-        if (product == None):
-            return {'message':'Product not found'}, 404
-        return product, 200
+    product = model.get(id)
 
-    except Exception as e:
-        current_app.logger.error(e)
-        return { 'message': 'Internal server error' }, 500
+    if (product == None):
+        raise ProductNotFound(id)
+
+    return product, 200
 
 
 @bp.route('/', methods=['POST'])
 def create_product():
-    try:
-        product = request.get_json()
-        saved = model.save(product)
-        return jsonify(saved), 201
+    product = request.get_json()
+    saved = model.save(product)
 
-    except Exception as e:
-        current_app.logger.error(e)
-        return { 'message': 'Internal server error' }, 500
+    return jsonify(saved), 201
 
 
 @bp.route('/', methods=['PUT'])
 def update_product():
-    try:
-        product = request.get_json()
-        if (not 'id' in product):
-            return {'message':'Missing product id'}, 400
+    product = request.get_json()
 
-        updated = model.update(product)
-        if (updated == None):
-            return {'message':'Product not found'}, 404
+    if (not 'id' in product):
+        raise MissingParameter('id')
 
-        return updated, 200
+    updated = model.update(product)
 
-    except Exception as e:
-        current_app.logger.error(e)
-        return { 'message': 'Internal server error' }, 500
+    if (updated == None):
+        raise ProductNotFound(product['id'])
+
+    return updated, 200
 
 
 @bp.route('/<id>', methods=['DELETE'])
 def delete_product(id):
-    try:
-        deleted = model.delete(id)
-        if (deleted == None):
-            return {'message':'Product not found'}, 404
-        return deleted, 200
+    deleted = model.delete(id)
 
-    except Exception as e:
-        current_app.logger.error(e)
-        return { 'message': 'Internal server error' }, 500
+    if (deleted == None):
+        raise ProductNotFound(deleted['id'])
+
+    return deleted, 200

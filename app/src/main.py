@@ -1,4 +1,6 @@
+import traceback
 from flask import Flask
+from werkzeug.exceptions import HTTPException
 from users import routes as userRoutes
 from products import routes as productRoutes
 from purchases import routes as purchaseRoutes
@@ -11,7 +13,26 @@ app.register_blueprint(productRoutes.bp)
 app.register_blueprint(purchaseRoutes.bp)
 
 @app.route('/')
-def hello_world():
+def ping():
     return {
-        "message": "Chiao World"
-    }
+        "message": "Python-Neo4j e-commerce api",
+        "routes": [
+            "/users",
+            "/products",
+            "/purchases"
+        ]
+    }, 200
+
+
+@app.errorhandler(Exception)
+def handle_exeption(e):
+    app.logger.error(e)
+    traceback.print_tb(e.__traceback__)
+
+    if isinstance(e, HTTPException):
+        return {
+            'type': e.name if not hasattr(e, 'type') else e.type,
+            'message': e.description
+        }, e.code
+
+    return { 'message': 'Internal server error' }, 500

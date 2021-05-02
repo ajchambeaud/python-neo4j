@@ -1,22 +1,8 @@
 from uuid import uuid1
 from flask import current_app
-
 from database.neo import NeoDB
-from products import model as productModel
 
-class ProductNotFound(Exception):
-    def __init__(self, productId):
-        self.productId = productId
-
-def save(user, items):
-    products = []
-
-    for item in items:
-        product = productModel.get(item['productId'])
-        if (product is None):
-            raise ProductNotFound(item['productId'])
-        products.append({**product, 'quantity': item['quantity']})
-
+def save(user, products):
     session = NeoDB().getSession()
 
     id_purchase = str(uuid1())
@@ -65,7 +51,7 @@ def get_all(user_id):
             purchaseId: purchaseId, 
             date: date, 
             items: items, 
-            total: reduce(t=0, item in items | t + (item.price * item.quantity))
+            total: round(reduce(t=0, item in items | t + (item.price * item.quantity)), 2)
         } as purchase
     """
 
@@ -92,7 +78,7 @@ def get(user_id, id):
             purchaseId: purchaseId, 
             date: date, 
             items: items, 
-            total: reduce(t=0, item in items | t + (item.price * item.quantity))
+            total: round(reduce(t=0, item in items | t + (item.price * item.quantity)), 2)
         } as purchase
     """
 
